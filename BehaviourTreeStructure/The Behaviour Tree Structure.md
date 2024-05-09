@@ -17,10 +17,6 @@ C[Sequence] --> H[Move into room]
 
 ```
 
-
-
-![[Example Behaviour Tree Structure.png|400]]
-
 All the different components in the tree are called Nodes. There are different types of nodes, the nodes on the nodes on the bottom row which don't have and *children* below them are all called leafs or edges. While the ones with children are called composites.
 
 # Nodes
