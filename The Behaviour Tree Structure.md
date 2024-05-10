@@ -1,7 +1,7 @@
 # The Tree
-Behaviour Trees are a way of organizing complex systems of behaviour. They might be used for decision-making in video game NPCs, robotics or simulation.
+Behaviour Trees are a way of organizing complex systems of behaviour. They can for instance be used for decision-making in video game NPCs, robotics or simulation.
 
-They're called behaviour "trees" since they're commonly represented as a graphs that resemble trees, with out-going branches that derive from branches that derive from a root.
+They're called behaviour "trees" since they're commonly represented as a graphs that resemble trees, with sprouting branches that derive from the root.
 
 
 ```mermaid
@@ -17,10 +17,10 @@ C[Sequence] --> H[Move into room]
 
 ```
 
-All the different components in the tree are called Nodes. There are different types of nodes, the nodes on the bottom row which don't have any *children* below them are all called leafs or edges. While the ones with children are called composites.
+All the different components in the tree are called Nodes. There are different types of them, the ones on the bottom row which don't have children are called leafs or edges. The nodes **with** children are called composites.
 
 # Nodes
-Nodes can be evaluated (a.k.a. executed), a node being evaluated means that it's Evaluate() method is called, the method can contain any code you please but it must return one of three ("node")states: *Failure*, *Success* or *Running*. *NodeStates* are how Nodes are able to communicate with the nodes above them in the tree-structure.
+Nodes can be evaluated (a.k.a. executed), a node being evaluated means that it's Evaluate() method is called, the method can contain any code you please but it must return one of three ("node")states: *Failure*, *Success* or *Running*. *NodeStates* are how nodes are able to communicate with the nodes above them in the tree-structure.
 
 (The root-node is special since it gets evaluated on a preset intervall, in video-games it's commonly once per frame, this will be important when we look at our first example later on.)
 
@@ -47,14 +47,14 @@ public class Node
 }
 ```
 
-Composite nodes, the ones with children, evaluates their children to retrieve
-NodeState results and return a NodeState of their own based upon those.
+Composite nodes, the ones with children, evaluate their children and return a NodeState based upon their children's result.
 
-The *NodeStates* *Success* and *Failure* are don't have any implicit meaning but composite nodes interpret these in unique ways. While a returned "Running" says: "Hey, I'm performing an asynchronous task, please *evaluate* me again so that I can finish my task". Running also makes all of it's ancestors (parents) up to the root return *running* as well.
+The NodeStates *Success* and *Failure* don't have any implicit meaning but composite nodes interpret these in unique ways. While a returned *Running* says: "Hey, I'm performing an asynchronous task, please *evaluate* me again so that I can finish my task". *Running* also makes all of it's ancestors (parents) up to the root return *Running* as well.
 
-### Common Composite Nodes
+## Common Composite Nodes
+To move on to the next section you only need a grasp of the *Sequence* and *Fallback* composites.
 #### Sequence
-Executes children in order till one of them returns Failure or all return Success. The sequence composite returns failure if none of it's children do so or success if one of it's children returns success.
+The sequence composite iterates through all it's children until one returns *Failure* or all return success. If one of it's children returns *Failure*, the sequence does the same, and only if all the children return *Success* the sequence does so too.
 
 ```cs
 public class Sequence : Node {  
@@ -84,8 +84,8 @@ public class Sequence : Node {
 }
 ```
 
-#### Fallback node
-Sometimes referred to as *Selectors*. Executes all it's children till one of them returns success or all of them have returned failure. Fallback returns failure if all of it's children return failure, otherwise success.
+#### Fallback
+Sometimes referred to as *Selectors*. The Fallback composite iterates through all it's children until one returns *Success* or all return *Failure*. If one of it's children returns *Success*, the Fallback does the same, but if all the children return *Failure* the Fallback does so too.
 
 ```cs
 public class Fallback : Node {  
@@ -117,7 +117,7 @@ public class Fallback : Node {
 ```
 
 #### Random
-This composite is not necessarily a feature of every behaviour trees system. My implementation of the random composite executes only one of it's children, a randomized one or the node from the last time if it returned running. The random node itself return value mirrors the one of the selected child. The children also have weights attached to them which are used to make the more or less probable to get executed.
+This composite is not necessarily a feature of every behaviour trees system. My implementation of the random composite executes only one of it's children, a randomized one or the node from the last iteration if it returned *Running*. The random node's return-value mirrors the one of the selected child. The children also have weights attached to them which are used to make the children nodes more or less probable to get executed.
 
 ```cs
 public class Random : Node {  
@@ -162,29 +162,28 @@ public class Random : Node {
 }
 ```
 
-### Decorators
+## Decorators
 A decorator is a composite node with merely one child by definition. Common ones are
 (mainly 1-4):
 1. Invert
-	Takes child's returned NodeState and returns the opposite: Success becomes Failure and vice versa, while Running gives Running.
+	Takes child's returned NodeState and returns the opposite: *Success* becomes *Failure* and vice versa, while *Running* gives *Running*.
 2. Retry
-	Takes a number as an additional argument, the number is the amount of times that the child would be reevaluated, until the child returns a success. The retry-node mirrors the child's last response.
+	Takes a number as an additional argument, the number is the amount of times that the child would be reevaluated, until the child returns a *Success*. The retry-node mirrors the child's last response.
 3. Repeat 
 	Evaluates child x amount of times (evaluations returning running aren't counted). Returns mirror of child's last return value.
 4. Timeout
-	Constricts asynchronous tasks to a time-limit. Returns Failure if time-limit is reached otherwise mirrors child.
+	Constricts asynchronous tasks to a time-limit. Returns *Failure* if time-limit is reached otherwise mirrors child.
 5. & 6. Force Success/Failure
-	Evaluates child till it's not running. Returns Success/Failure, respectively, regardless of what the child's return value is.
-7. & 8. Keep Running Until Success/Failure
-	Keeps child running until success or failure respectively
+	Evaluates child till it's not *Running*. Returns *Success*/*Failure*, respectively, regardless of what the child's return value is.
+7. & 8. Keep Running Until *Success*/*Failure*
+	Keeps child running until *Success* or *Failure* respectively
 
-### Edges/Leafs
+## Edges/Leafs
 While composite nodes are used to control the flow and logic of the tree, edges are used control-statements and actions. 
 
-An example statement could be "Is the door open?", which could be true, the door is open, or false, it's closed. Success symbolizes true, and Failure false. 
+An example statement could be "Is the door open?", which could be true, the door is open, or false, it's closed. *Success* symbolizes true, and *Failure* false. 
 
 Actions are things that happen, for instance following up on "Is the door open?", a good response to that being true might be to "Go though the door!".
-
 # A tree in practice
 Combining our knowledge so far we'll be able to look at an example. Remember how the root node gets evaluated on a time intervall, now that will be important to keep in mind.
 
@@ -196,7 +195,7 @@ A[Fallback] --> B[Sequence]
 	B[Sequence] --> D[Go though the door!]
 A[Fallback] --> E[Open door!]
 ```
-This might be overwhelming at first but we'll start of by defining our goal, which is to make our way through a door. We start at the Fallback which leads us down to the Sequence which evaluates "Is the door open?", if it is then the Sequence continues to execute it's children in order resulting in the action "Go though the door!". The second scenario where "Is the door open?" evaluates Failure is more tricky. in this scenario the Sequence also returns Failure and the Fallback goes on to "Open door!". Now this tree has a root node that happens to be evaluated every 3 seconds.  So the next time around the door will be open and we end up like we did in scenario 1. Yay, we've made our way through the door!
+We'll start of by defining our goal, which is to make our way through a door. We start at the Fallback which leads us down to the Sequence which evaluates "Is the door open?", if it is then the Sequence continues to execute it's children in order resulting in the action "Go though the door!". The second scenario where "Is the door open?" returns *Failure* is more tricky. In this scenario the Sequence also returns *Failure* and the Fallback goes on to "Open door!". So the next time the root gets evaluated the door will be open and we end up like we did in scenario 1. Yay, we've made our way through the door!
 
 # Sources:
 - Auryn Robotics. (n.d.). *Decorators*. Retrieved 2024-05-09 from https://www.behaviortree.dev/docs/nodes-library/decoratornode/
