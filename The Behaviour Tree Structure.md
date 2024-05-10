@@ -1,7 +1,7 @@
 # The Tree
-Behaviour Trees are a way of organizing complex systems of behaviour. They might be used for decision-making in video game NPCs and enemies. If you want to sound cool you might call behaviour trees, AI. 
+Behaviour Trees are a way of organizing complex systems of behaviour. They might be used for decision-making in video game NPCs, robotics or simulation.
 
-They're called behaviour trees since they're commonly represented as something which resembles a tree, with out-going branches that derive from branches that derive from a root.
+They're called behaviour "trees" since they're commonly represented as a graphs that resemble trees, with out-going branches that derive from branches that derive from a root.
 
 
 ```mermaid
@@ -17,10 +17,12 @@ C[Sequence] --> H[Move into room]
 
 ```
 
-All the different components in the tree are called Nodes. There are different types of nodes, the nodes on the nodes on the bottom row which don't have and *children* below them are all called leafs or edges. While the ones with children are called composites.
+All the different components in the tree are called Nodes. There are different types of nodes, the nodes on the bottom row which don't have any *children* below them are all called leafs or edges. While the ones with children are called composites.
 
 # Nodes
-Nodes can be evaluated (or executed), and must return one of three ("node")states: *Failure*, *Success* or *Running*. The root-node is special since it gets evaluated on a preset intervall, in video-games it's commonly once per frame, this will be important when we look at our first example. *NodeStates* is how Nodes are able to communicate with the nodes above them in the tree-structure. 
+Nodes can be evaluated (a.k.a. executed), a node being evaluated means that it's Evaluate() method is called, the method can contain any code you please but it must return one of three ("node")states: *Failure*, *Success* or *Running*. *NodeStates* are how Nodes are able to communicate with the nodes above them in the tree-structure.
+
+(The root-node is special since it gets evaluated on a preset intervall, in video-games it's commonly once per frame, this will be important when we look at our first example later on.)
 
 ```cpp  
 public enum NodeState { RUNNING, SUCCESS, FAILURE }
@@ -45,8 +47,8 @@ public class Node
 }
 ```
 
-Some nodes have children these are called *Composite Nodes*. These evaluate their children's 
-`NodeState` results in some way and return their own `NodeState` based on those.
+Composite nodes, the ones with children, evaluates their children to retrieve
+NodeState results and return a NodeState of their own based upon those.
 
 The *NodeStates* *Success* and *Failure* are don't have any implicit meaning but composite nodes interpret these in unique ways. While a returned "Running" says: "Hey, I'm performing an asynchronous task, please *evaluate* me again so that I can finish my task". Running also makes all of it's ancestors (parents) up to the root return *running* as well.
 
