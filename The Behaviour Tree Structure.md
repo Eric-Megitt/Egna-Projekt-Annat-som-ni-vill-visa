@@ -17,14 +17,10 @@ C[Sequence] --> H[Move into room]
 
 ```
 
-
-
-![[Example Behaviour Tree Structure.png|400]]
-
 All the different components in the tree are called Nodes. There are different types of nodes, the nodes on the nodes on the bottom row which don't have and *children* below them are all called leafs or edges. While the ones with children are called composites.
 
 # Nodes
-Nodes can be evaluated (or executed), and must return one of three ("node")states: *Failure*, *Success* or *Running*. *NodeStates* is how Nodes are able to communicate with the nodes above them in the tree-structure. 
+Nodes can be evaluated (or executed), and must return one of three ("node")states: *Failure*, *Success* or *Running*. The root-node is special since it gets evaluated on a preset intervall, in video-games it's commonly once per frame, this will be important when we look at our first example. *NodeStates* is how Nodes are able to communicate with the nodes above them in the tree-structure. 
 
 ```cpp  
 public enum NodeState { RUNNING, SUCCESS, FAILURE }
@@ -180,12 +176,25 @@ A decorator is a composite node with merely one child by definition. Common ones
 7. & 8. Keep Running Until Success/Failure
 	Keeps child running until success or failure respectively
 
-### Edges
+### Edges/Leafs
+While composite nodes are used to control the flow and logic of the tree, edges are used control-statements and actions. 
 
+An example statement could be "Is the door open?", which could be true, the door is open, or false, it's closed. Success symbolizes true, and Failure false. 
 
+Actions are things that happen, for instance following up on "Is the door open?", a good response to that being true might be to "Go though the door!".
 
+# A tree in practice
+Combining our knowledge so far we'll be able to look at an example. Remember how the root node gets evaluated on a time intervall, now that will be important to keep in mind.
 
+```mermaid
+graph TD
 
+A[Fallback] --> B[Sequence]
+	B[Sequence] --> C[Is the door open?]
+	B[Sequence] --> D[Go though the door!]
+A[Fallback] --> E[Open door!]
+```
+This might be overwhelming at first but we'll start of by defining our goal, which is to make our way through a door. We start at the Fallback which leads us down to the Sequence which evaluates "Is the door open?", if it is then the Sequence continues to execute it's children in order resulting in the action "Go though the door!". The second scenario where "Is the door open?" evaluates Failure is more tricky. in this scenario the Sequence also returns Failure and the Fallback goes on to "Open door!". Now this tree has a root node that happens to be evaluated every 3 seconds.  So the next time around the door will be open and we end up like we did in scenario 1. Yay, we've made our way through the door!
 
 # Sources:
 - Auryn Robotics. (n.d.). *Decorators*. Retrieved 2024-05-09 from https://www.behaviortree.dev/docs/nodes-library/decoratornode/
