@@ -5,7 +5,7 @@ They're called behaviour "trees" since they're commonly represented as a graphs 
 
 
 ```mermaid
-graph TD
+graph TD    
 
 A[Fallback] --> B[Sequence] 
 A[Fallback] --> C[Sequence]
@@ -20,7 +20,7 @@ C[Sequence] --> H[Move into room]
 All the different components in the tree are called Nodes. There are different types of them, the ones on the bottom row which don't have children are called leafs or edges. The nodes **with** children are called composites.
 
 # Nodes
-Nodes can be evaluated (a.k.a. executed), a node being evaluated means that it's Evaluate() method is called, the method can contain any code you please but it must return one of three ("node")states: *Failure*, *Success* or *Running*. *NodeStates* are how nodes are able to communicate with the nodes above them in the tree-structure.
+Nodes can be evaluated (a.k.a. executed), a node being evaluated means that it's Evaluate() method is called, the method can contain any code you please but it must return one of three ("node")states: *Failure*, *Success* or *Running*. NodeStates are how nodes are able to communicate with the nodes above them in the tree-structure.
 
 (The root-node is special since it gets evaluated on a preset intervall, in video-games it's commonly once per frame, this will be important when we look at our first example later on.)
 
