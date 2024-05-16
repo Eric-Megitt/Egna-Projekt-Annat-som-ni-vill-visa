@@ -4,19 +4,18 @@ namespace BehaviourTree
 { 
 	public enum NodeState { RUNNING, SUCCESS, FAILURE }
 
-	public class Node {  
+	public class Node  
+	{  
 		protected List<Node> children;    
-		
+	
 		internal Node(params Node[] children) {  
 			this.children = new();  
 			foreach (Node child in children)  
 				this.children.Add(child);  
 		}   
-		  
-		protected virtual NodeState Evaluate() {
-		    return NodeState.Failure; //gets overridden
-		} 
-	    
+	  
+		protected virtual NodeState Evaluate() => NodeState.FAILURE; //gets overridden
+    
 		public NodeState PerformNode() => Evaluate(); 
 	}
 }
