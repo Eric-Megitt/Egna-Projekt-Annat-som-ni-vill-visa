@@ -40,7 +40,7 @@ public class Node
     }   
 	  
     protected virtual NodeState Evaluate() {
-	    return NodeState.Failure; //gets overridden
+	    return NodeState.FAILURE; //gets overridden
     } 
     
 	public NodeState PerformNode() => Evaluate(); 
