@@ -153,8 +153,8 @@ public class Random : Node {
 		}  
   
 		childReturnValue = weightDict.ElementAt(index).Key.PerformNode();  
-		if (childReturnValue == NodeState.Running) {  
-			runningIndex = index  
+		if (childReturnValue == NodeState.RUNNING) {  
+			runningIndex = index;  
 			running = true;  
 		}  
 	    return childReturnValue;  
