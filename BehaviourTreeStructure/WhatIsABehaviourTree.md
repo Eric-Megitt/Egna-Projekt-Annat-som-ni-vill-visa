@@ -124,7 +124,7 @@ public class Random : Node {
     private readonly Dictionary<Node, int> weightDict;  
 	
     public Random(Dictionary<Node, int> childrenWithWeights) : base(childrenWithWeights.Keys.ToArray()) {  
-		weightDict = children;  
+		weightDict = childrenWithWeights;  
     }  
 	
     bool running = false;    
@@ -135,7 +135,7 @@ public class Random : Node {
 		NodeState childReturnValue;  
 		if (running) {  
 	        childReturnValue = weightDict.ElementAt(runningIndex).Key.PerformNode();  
-	        if (childReturnValue != NodeState.Running) {  
+	        if (childReturnValue != NodeState.RUNNING) {  
 	            running = false;  
 	        }  
 	        return childReturnValue;  
