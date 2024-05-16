@@ -1,180 +1,100 @@
-/*
-	Eric Scott Megitt, SU22C LBS Gothenburg
-	eric.megitt@elev.ga.lbs.se
-	Version 0.2.1
-
-	See ChangeLog at Bottom
-*/
-
-
-using ScottsEssentials;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace BehaviourTree
 {
-	public class Random : Node
-	{
-		private readonly Dictionary<Node, int> weightDict;
-
-		public Random(Dictionary<Node, int> children) : base(children.Keys.ToArray())
-		{
-			weightDict = children;
-		}
-
-		int lastIndex = -1;
-		NodeState lastReturnValue = NodeState.SUCCESS;
-
-		protected override NodeState Evaluate()
-		{
-
-			if (lastReturnValue == NodeState.RUNNING)
-			{
-				lastReturnValue = weightDict.ElementAt(lastIndex).Key.PerformNode();
-			}
-			else
-			{
-				int rand = UnityEngine.Random.Range(0, weightDict.Values.Sum());
-				int index = 0;
-				foreach (KeyValuePair<Node, int> entry in weightDict)
-				{
-					rand -= entry.Value;
-					if (rand < 0)
-						break;
-					index++;
-				}
-				lastIndex = index;
-				lastReturnValue = weightDict.ElementAt(lastIndex).Key.PerformNode();
-			}
-			return lastReturnValue;
-		}
+	public class Random : Node {  
+		private readonly Dictionary<Node, int> weightDict;  
+	
+		public Random(Dictionary<Node, int> childrenWithWeights) : base(childrenWithWeights.Keys.ToArray()) {  
+			weightDict = childrenWithWeights;  
+		}  
+	
+		bool running = false;    
+		int runningIndex = 0;  
+	
+		protected override NodeState Evaluate()  
+		{  
+			NodeState childReturnValue;  
+			if (running) {  
+				childReturnValue = weightDict.ElementAt(runningIndex).Key.PerformNode();  
+				if (childReturnValue != NodeState.RUNNING) {  
+					running = false;  
+				}  
+				return childReturnValue;  
+			}  
+      
+			int rand = UnityEngine.Random.Range(0, weightDict.Values.Sum());  
+			int index = 0;  
+			foreach (KeyValuePair<Node, int> entry in weightDict)  
+			{  
+				rand -= entry.Value;  
+				if (rand < 0) {  
+					break;  
+				}  
+				index++;  
+			}  
+  
+			childReturnValue = weightDict.ElementAt(index).Key.PerformNode();  
+			if (childReturnValue == NodeState.RUNNING) {
+				runningIndex = index;  
+				running = true;  
+			}  
+			return childReturnValue;  
+		}  
 	}
 
-    public class Fallback : Node
-    {
-        public Fallback(params Node[] children) : base(children) { }
+	public class Fallback : Node {  
+		public Fallback(params Node[] children) : base(children) { }  
+    
+		bool running = false;    
+		int runningIndex = 0;   
+	
+		protected override NodeState Evaluate() {    
+			for (int i = running ? runningIndex : 0; i < children.Count; i++) {    
+				running = false;    
+				switch (children[i].PerformNode())  
+				{  
+					case NodeState.SUCCESS:  
+						return NodeState.SUCCESS;  
+					case NodeState.FAILURE:  
+						continue;  
+					case NodeState.RUNNING:  
+						running = true;    
+						runningIndex = i;  
+						return NodeState.RUNNING;  
+					default:  
+						continue;  
+				}   
+			}    
+			return NodeState.SUCCESS;    
+		}    
+	}
 
-        int? runningIndex = null;
-        protected override NodeState Evaluate()
-        {
-            if (runningIndex != null)
-            {
-                switch (children[(int)runningIndex].PerformNode())
-                {
-                    case NodeState.FAILURE:
-                        for (int i = ((int)runningIndex) + 1; i < children.Count; i++)
-                        {
-                            Node child = children[i];
-                            switch (child.PerformNode())
-                            {
-                                case NodeState.FAILURE:
-                                    continue;
-                                case NodeState.SUCCESS:
-                                    return NodeState.SUCCESS;
-                                case NodeState.RUNNING:
-                                    runningIndex = i;
-                                    return NodeState.RUNNING;
-                                default:
-                                    continue;
-                            }
-                        }
-                        runningIndex = null;
-                        return NodeState.FAILURE;
-
-                    case NodeState.SUCCESS:
-                        runningIndex = null;
-                        return NodeState.SUCCESS;
-                    case NodeState.RUNNING:
-                        return NodeState.RUNNING;
-                }
-            }
-            else
-            {
-                for (int i = 0; i < children.Count; i++)
-                {
-                    Node child = children[i];
-                    switch (child.PerformNode())
-                    {
-                        case NodeState.FAILURE:
-                            continue;
-                        case NodeState.SUCCESS:
-                            return NodeState.SUCCESS;
-                        case NodeState.RUNNING:
-                            runningIndex = i;
-                            return NodeState.RUNNING;
-                        default:
-                            continue;
-                    }
-                }
-            }
-            return NodeState.FAILURE;
-        }
-    }
-
-    public class Sequence : Node
-	{
-		public Sequence(params Node[] children) : base(children) { }
-
-
-		int? runningIndex = null;
-
-		protected override NodeState Evaluate()
-		{
-
-			if (runningIndex != null)
-			{
-				switch (children[(int)runningIndex].PerformNode())
-				{
-					case NodeState.SUCCESS:
-						for (int i = (int)runningIndex + 1; i < children.Count; i++)
-						{
-							Node child = children[i];
-							switch (child.PerformNode())
-							{
-								case NodeState.FAILURE:
-									return NodeState.FAILURE;
-								case NodeState.SUCCESS:
-									continue;
-								case NodeState.RUNNING:
-									runningIndex = i;
-									return NodeState.RUNNING;
-								default:
-									return NodeState.SUCCESS;
-							}
-						}
-						runningIndex = null;
-						return NodeState.SUCCESS;
-
-					case NodeState.FAILURE:
-						runningIndex = null;
-						return NodeState.FAILURE;
-					case NodeState.RUNNING:
-						return NodeState.RUNNING;
-
-				}
-			}
-			else
-			{
-				for (int i = 0; i < children.Count; i++)
-				{
-					Node child = children[i];
-					switch (child.PerformNode())
-					{
-						case NodeState.FAILURE:
-							return NodeState.FAILURE;
-						case NodeState.SUCCESS:
-							continue;
-						case NodeState.RUNNING:
-							runningIndex = i;
-							return NodeState.RUNNING;
-						default:
-							return NodeState.SUCCESS;
-					}
-				}
-			}
-			return NodeState.SUCCESS;
-		}
+	public class Sequence : Node {  
+		public Sequence(params Node[] children) : base(children) { }  
+	
+		bool running = false;  
+		int runningIndex = 0;  
+	
+		protected override NodeState Evaluate() {  
+			for (int i = running ? runningIndex : 0; i < children.Count; i++) {  
+				running = false;  
+				switch (children[i].PerformNode()) {  
+					case NodeState.SUCCESS:  
+						continue;  
+					case NodeState.FAILURE:  
+						return NodeState.FAILURE;  
+					case NodeState.RUNNING:  
+						running = true;  
+						runningIndex = i;  
+						return NodeState.RUNNING;  
+					default:  
+						return NodeState.SUCCESS;  
+				}  
+			}  
+			return NodeState.SUCCESS;  
+		}  
 	}
 
 
@@ -295,27 +215,14 @@ namespace BehaviourTree
 	}
 }
 
-/*
-
---Versions-- 
-
-0.0.0:
-	Composites:
-		+ Random
-		+ Fallback
-		+ Sequence
-		+ Invert
-0.0.1:
-	Composites:
-		Fixed Bug in Fallback; it didnt store runningIndex
-0.1.0:
-	Composites:
-		+ Parallel
-0.2.0:
-	Composites:
-		+ HierchricalParallel
-0.3.0:
-	Composites:
-		+ SubTree
-
-*/
+public static class ArrayTools
+{
+	/// <summary>
+	/// Every element of the array gets set to it's default value
+	/// </summary>
+	public static void ResetArray<T>(this T[] array)
+	{
+		for (int i = 0; i < array.Length; i++)
+			array[i] = default(T);
+	}
+}
