@@ -1,10 +1,3 @@
-/*
-	Eric Scott Megitt, SU22C LBS Gothenburg
-	eric.megitt@elev.ga.lbs.se
-	12-03-2023
-*/
-
-
 using System;
 using UnityEngine;
 
