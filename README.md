@@ -4,6 +4,6 @@ An explanation of **how behviour trees work** can be found in [WhatIsABehaviourT
 
 I've suggested a **[list of criteria](./BehaviourTreeStructure/CoveredGradingCriteria.md) from the course**, that I believe this system covers
 
-All of my **code** for the system can be found [here](./BehaviourTreeStructure/Code/)
+All of my **code** for the system can be found [here](./BehaviourTreeStructure/Code/) and an [example implementation](./BehaviourTreeStructure/DemoTree.cs) of the system here 
 
 [Here](./BehaviourTreeStructure/ClassDiagram.md)'s a **class diagram** over the foundamental classes
