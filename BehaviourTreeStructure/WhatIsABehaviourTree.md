@@ -197,6 +197,6 @@ A[Fallback] --> E[Open door!]
 ```
 We'll start of by defining our goal, which is to make our way through a door. We start at the Fallback which leads us down to the Sequence which evaluates "Is the door open?", if it is then the Sequence continues to execute it's children in order resulting in the action "Go though the door!". The second scenario where "Is the door open?" returns *Failure* is more tricky. In this scenario the Sequence also returns *Failure* and the Fallback goes on to "Open door!". So the next time the root gets evaluated the door will be open and we end up like we did in scenario 1. Yay, we've made our way through the door!
 
-# Sources:
+# Sources
 - Auryn Robotics. (n.d.). *Decorators*. Retrieved 2024-05-09 from https://www.behaviortree.dev/docs/nodes-library/decoratornode/
 - Robohub. (2021). *Introduction to behavior trees*. Retrieved 2024-05-09 from https://robohub.org/introduction-to-behavior-trees/
